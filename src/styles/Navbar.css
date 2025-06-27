@@ -1,0 +1,90 @@
+nav.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 2rem;
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  min-height: 70px;
+  gap: 1.5rem;
+}
+
+.navbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navbar__logo {
+  height: 48px;
+}
+
+.navbar__divider {
+  border-left: 1px solid #bdbdbd;
+  height: 40px;
+  margin: 0 1rem;
+}
+
+.navbar__text {
+  line-height: 1.1;
+}
+
+.navbar__text--top {
+  font-size: 0.95rem;
+  color: #888;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+.navbar__text--middle {
+  font-size: 1.1rem;
+  color: #1a567b;
+  font-weight: 700;
+}
+
+.navbar__text--bottom {
+  font-size: 0.95rem;
+  color: #888;
+  font-weight: 500;
+}
+
+.navbar__menu {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.navbar__link {
+  color: #1a567b;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.navbar__search {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  border: 1px solid #bdbdbd;
+  outline: none;
+  font-size: 1rem;
+  min-width: 160px;
+}
+
+.navbar__button {
+  background: none;
+  border: 1px solid #1a567b;
+  color: #1a567b;
+  border-radius: 20px;
+  padding: 0.4rem 1.2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-right: 0.5rem;
+  cursor: pointer;
+}
+
+.navbar__button--primary {
+  background: #1a567b;
+  border: none;
+  color: #fff;
+  margin-right: 0;
+} 
