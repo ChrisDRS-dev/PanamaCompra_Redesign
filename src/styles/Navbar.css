@@ -97,7 +97,7 @@
   font-size: 1rem;
   margin-right: 0.5rem;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: background var(--navbar-transition), color var(--navbar-transition);
 }
 
 .navbar__button--primary {
@@ -117,6 +117,7 @@
 .navbar__button--primary:focus {
   background: #145e7a;
   color: #fff;
+  transition: background var(--navbar-transition), color var(--navbar-transition);
 }
 
 /* Barra de menú principal */
@@ -124,9 +125,9 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #f7fbfd;
-  padding: 0.4rem 2rem;
-  border-bottom: 1.5px solid #bdbdbd;
+  background: #fff;
+  padding: 0;
+  border-bottom: none;
 }
 
 .navbar__link {
@@ -138,7 +139,7 @@
   border-radius: 12px;
   padding: 0.4rem 1.2rem;
   margin-right: 0.2rem;
-  transition: background 0.2s, color 0.2s;
+  transition: background var(--navbar-transition), color var(--navbar-transition);
   border: 1.5px solid transparent;
 }
 
@@ -148,6 +149,7 @@
   background: #1780a1;
   color: #fff;
   border: 1.5px solid #1780a1;
+  transition: background var(--navbar-transition), color var(--navbar-transition), border var(--navbar-transition);
 }
 
 .navbar__dropdown {
@@ -167,13 +169,14 @@
   border-radius: 12px;
   padding: 0.4rem 1.2rem;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: background var(--navbar-transition), color var(--navbar-transition);
 }
 
 .navbar__dropdown-btn:hover,
 .navbar__dropdown-btn:focus {
   background: #1780a1;
   color: #fff;
+  transition: background var(--navbar-transition), color var(--navbar-transition);
 }
 
 .navbar__icon-caret {
@@ -205,10 +208,17 @@
   color: #1780a1;
   font-size: 1rem;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color var(--navbar-transition);
 }
 
 .navbar__dropdown-menu li:hover {
   color: #145e7a;
   text-decoration: underline;
+  transition: color var(--navbar-transition);
+}
+
+:root {
+  --navbar-transition-time: 0.25s;
+  --navbar-transition-ease: cubic-bezier(.4,1.6,.4,1);
+  --navbar-transition: var(--navbar-transition-time) var(--navbar-transition-ease);
 } 

@@ -79,7 +79,7 @@ const Navbar = () => {
               {col.map((item, i) => (
                 <li key={i} className="navbar__dropdown-item">
                   <span className="navbar__dropdown-bullet" />
-                  {item}
+                  <a href="#" className="navbar__dropdown-link">{item}</a>
                 </li>
               ))}
             </ul>
@@ -97,12 +97,22 @@ const Navbar = () => {
           <a href="/">
             <img src={logoGubernamental} alt="Logo Gubernamental" className="navbar__logo" />
           </a>
-          <div className="navbar__divider" />
-          <div className="navbar__text-group">
-            <span className="navbar__text--top">GOBIERNO NACIONAL</span>
-            <span className="navbar__text--middle">CON PASO FIRME</span>
-            <span className="navbar__text--bottom">DIRECCIÓN GENERAL DE CONTRATACIONES PÚBLICAS</span>
-          </div>
+          <nav className="navbar__mainbar navbar__mainbar--inline">
+            <a href="#" className="navbar__link navbar__link--active">Inicio</a>
+            {Object.keys(menuConfig).map((key) => (
+              <div
+                key={key}
+                className="navbar__dropdown"
+                onMouseEnter={() => setOpenMenu(key)}
+                onMouseLeave={() => setOpenMenu(null)}
+              >
+                <button className="navbar__link navbar__dropdown-btn">
+                  {menuConfig[key].title} <span className="navbar__icon-caret">▼</span>
+                </button>
+                {openMenu === key && renderDropdown(key)}
+              </div>
+            ))}
+          </nav>
         </div>
         <div className="navbar__actions">
           <div className="navbar__search-group">
@@ -115,23 +125,6 @@ const Navbar = () => {
           <button className="navbar__button navbar__button--primary">Register</button>
         </div>
       </div>
-      {/* Barra de menú principal */}
-      <nav className="navbar__mainbar">
-        <a href="#" className="navbar__link navbar__link--active">Inicio</a>
-        {Object.keys(menuConfig).map((key) => (
-          <div
-            key={key}
-            className="navbar__dropdown"
-            onMouseEnter={() => setOpenMenu(key)}
-            onMouseLeave={() => setOpenMenu(null)}
-          >
-            <button className="navbar__link navbar__dropdown-btn">
-              {menuConfig[key].title} <span className="navbar__icon-caret">▼</span>
-            </button>
-            {openMenu === key && renderDropdown(key)}
-          </div>
-        ))}
-      </nav>
     </header>
   );
 };
