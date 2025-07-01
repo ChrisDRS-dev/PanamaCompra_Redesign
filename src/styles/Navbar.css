@@ -1,12 +1,11 @@
-nav.navbar {
+/* Barra superior institucional */
+.navbar__topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 2rem;
   background: #fff;
-  border-bottom: 1px solid #e0e0e0;
-  min-height: 70px;
-  gap: 1.5rem;
+  padding: 0.5rem 2rem 0.5rem 2rem;
+  border-bottom: 3px solid #1780a1;
 }
 
 .navbar__brand {
@@ -25,12 +24,14 @@ nav.navbar {
   margin: 0 1rem;
 }
 
-.navbar__text {
-  line-height: 1.1;
+.navbar__text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
 }
 
 .navbar__text--top {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: #888;
   font-weight: 500;
   letter-spacing: 0.08em;
@@ -38,8 +39,9 @@ nav.navbar {
 
 .navbar__text--middle {
   font-size: 1.1rem;
-  color: #1a567b;
+  color: #1780a1;
   font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .navbar__text--bottom {
@@ -48,43 +50,165 @@ nav.navbar {
   font-weight: 500;
 }
 
-.navbar__menu {
+.navbar__actions {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
-.navbar__link {
-  color: #1a567b;
-  font-weight: 600;
-  text-decoration: none;
-  font-size: 1rem;
+.navbar__search-group {
+  display: flex;
+  align-items: center;
+  background: #eaf6fa;
+  border-radius: 20px;
+  padding: 0.2rem 0.7rem;
+  border: 1px solid #bdbdbd;
+  margin-right: 0.5rem;
 }
 
 .navbar__search {
-  padding: 0.4rem 1rem;
-  border-radius: 20px;
-  border: 1px solid #bdbdbd;
+  background: transparent;
+  border: none;
   outline: none;
   font-size: 1rem;
-  min-width: 160px;
+  min-width: 120px;
+  padding: 0.3rem 0.5rem;
+}
+
+.navbar__icon-search {
+  font-size: 1.2rem;
+  color: #1780a1;
+  margin-left: 0.2rem;
+  cursor: pointer;
+}
+
+.navbar__icon-login {
+  font-size: 1.1rem;
+  margin-right: 0.3rem;
 }
 
 .navbar__button {
   background: none;
-  border: 1px solid #1a567b;
-  color: #1a567b;
+  border: 1.5px solid #1780a1;
+  color: #1780a1;
   border-radius: 20px;
   padding: 0.4rem 1.2rem;
   font-weight: 600;
   font-size: 1rem;
   margin-right: 0.5rem;
   cursor: pointer;
+  transition: background 0.2s, color 0.2s;
 }
 
 .navbar__button--primary {
-  background: #1a567b;
+  background: #1780a1;
   border: none;
   color: #fff;
   margin-right: 0;
+}
+
+.navbar__button:hover,
+.navbar__button:focus {
+  background: #eaf6fa;
+  color: #1780a1;
+}
+
+.navbar__button--primary:hover,
+.navbar__button--primary:focus {
+  background: #145e7a;
+  color: #fff;
+}
+
+/* Barra de menú principal */
+.navbar__mainbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f7fbfd;
+  padding: 0.4rem 2rem;
+  border-bottom: 1.5px solid #bdbdbd;
+}
+
+.navbar__link {
+  color: #1780a1;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1.05rem;
+  background: #eaf6fa;
+  border-radius: 12px;
+  padding: 0.4rem 1.2rem;
+  margin-right: 0.2rem;
+  transition: background 0.2s, color 0.2s;
+  border: 1.5px solid transparent;
+}
+
+.navbar__link--active,
+.navbar__link:hover,
+.navbar__link:focus {
+  background: #1780a1;
+  color: #fff;
+  border: 1.5px solid #1780a1;
+}
+
+.navbar__dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.navbar__dropdown-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #eaf6fa;
+  border: none;
+  color: #1780a1;
+  font-weight: 600;
+  font-size: 1.05rem;
+  border-radius: 12px;
+  padding: 0.4rem 1.2rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.navbar__dropdown-btn:hover,
+.navbar__dropdown-btn:focus {
+  background: #1780a1;
+  color: #fff;
+}
+
+.navbar__icon-caret {
+  font-size: 0.9rem;
+  margin-left: 0.2rem;
+}
+
+.navbar__dropdown-menu {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  background: #fff;
+  border: 1.5px solid #bdbdbd;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  min-width: 260px;
+  z-index: 10;
+  padding: 0.7rem 1rem;
+}
+
+.navbar__dropdown-menu ul {
+  list-style: disc inside;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar__dropdown-menu li {
+  padding: 0.3rem 0;
+  color: #1780a1;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.navbar__dropdown-menu li:hover {
+  color: #145e7a;
+  text-decoration: underline;
 } 
