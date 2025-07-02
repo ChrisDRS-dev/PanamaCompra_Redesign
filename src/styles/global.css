@@ -3,3 +3,8 @@
     --secondary-color: #fff;
     --tertiary-color: #000;
 }
+
+body {
+    padding: 0;
+    margin: 0;
+}

@@ -1,0 +1,92 @@
+/* Contenedor principal de versiones */
+.versions-section {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: stretch;
+  gap: 2rem;
+  margin: 2.5rem 0 0 0;
+  padding: 0 1rem;
+}
+
+/* Tarjeta de cada versión */
+.versions-card {
+  background: #e3e3e3;
+  border-radius: 8px;
+  box-shadow: none;
+  padding: 1.7rem 1.2rem 1.2rem 1.2rem;
+  flex: 1 1 0;
+  max-width: 540px;
+  min-width: 420px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.versions-title {
+  color: #1780a1;
+  font-size: 2.1rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 1.1rem;
+}
+
+.versions-desc {
+  color: #222;
+  font-size: 1.05rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.versions-btn {
+  background: #1780a1;
+  color: #fff;
+  font-size: 1.08rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 2.2rem;
+  margin-top: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.versions-btn:hover,
+.versions-btn:focus {
+  background: #145e7a;
+}
+
+@media (max-width: 1200px) {
+  .versions-card {
+    max-width: 98vw;
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .versions-section {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .versions-card {
+    max-width: 98vw;
+    min-width: 0;
+    width: 100%;
+    padding: 1.2rem 0.7rem 1rem 0.7rem;
+  }
+  .versions-title {
+    font-size: 1.5rem;
+  }
+  .versions-desc {
+    font-size: 0.97rem;
+  }
+} 
