@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import logoGubernamental from "../assets/logo-gubernamental.png";
 import "../styles/Navbar.css";
+import { FaUserCircle, FaBars } from "react-icons/fa";
 
 const proveedoresMenu = [
   [
@@ -59,6 +60,8 @@ const menuConfig = {
 
 const Navbar = () => {
   const [openMenu, setOpenMenu] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   const handleCloseMenu = () => setOpenMenu(null);
 
@@ -114,15 +117,39 @@ const Navbar = () => {
             ))}
           </nav>
         </div>
+        {/* Menú mobile desplegable */}
+        {mobileMenuOpen && (
+          <div className="navbar__mobile-menu">
+            <a href="#" className="navbar__mobile-link">Inicio</a>
+            {Object.keys(menuConfig).map((key) => (
+              <a href="#" className="navbar__mobile-link" key={key}>{menuConfig[key].title}</a>
+            ))}
+          </div>
+        )}
         <div className="navbar__actions">
           <div className="navbar__search-group">
-            <input type="text" placeholder="search" className="navbar__search" />
-            <span className="navbar__icon-search" title="Buscar">🔍</span>
+            {/* Mobile: solo mostrar lupa, al hacer click mostrar input */}
+            <input
+              type="text"
+              placeholder="search"
+              className="navbar__search"
+              style={{ display: showMobileSearch ? 'block' : '', width: showMobileSearch ? '120px' : '' }}
+              onBlur={() => setShowMobileSearch(false)}
+            />
+            <span
+              className="navbar__icon-search"
+              title="Buscar"
+              onClick={() => setShowMobileSearch((v) => !v)}
+              style={{ display: window.innerWidth <= 900 && !showMobileSearch ? 'block' : '' }}
+            >🔍</span>
           </div>
-          <button className="navbar__button">
-            <span className="navbar__icon-login">⎆</span> Sign in
+          <button className="navbar__button navbar__button--user" title="Iniciar sesión">
+            <FaUserCircle className="navbar__icon-user" />
           </button>
-          <button className="navbar__button navbar__button--primary">Register</button>
+          {/* Botón hamburguesa solo en mobile, a la derecha del usuario */}
+          <button className="navbar__hamburger" onClick={() => setMobileMenuOpen((v) => !v)}>
+            <FaBars />
+          </button>
         </div>
       </div>
     </header>

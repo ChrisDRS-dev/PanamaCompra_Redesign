@@ -50,7 +50,10 @@
 
 .tool-icon {
   color: #23292f;
-  font-size: 2.5rem;
+  width: 48px;
+  height: 48px;
+  font-size: 48px;
+  display: block;
 }
 
 .tool-label {
@@ -76,18 +79,22 @@
     gap: 1.2rem;
     max-width: 98vw;
     padding: 0 0.5rem;
+    justify-content: center;
   }
   .tool-card {
     max-width: 98vw;
     padding: 1.2rem 0.5rem 1rem 0.5rem;
+    border-radius: 8px;
   }
   .tool-icon-bg {
-    width: 60px;
-    height: 60px;
+    width: 54px;
+    height: 54px;
     margin-bottom: 0.7rem;
   }
   .tool-icon {
     font-size: 1.7rem;
+    width: 32px;
+    height: 32px;
   }
   .tool-label {
     font-size: 0.97rem;
