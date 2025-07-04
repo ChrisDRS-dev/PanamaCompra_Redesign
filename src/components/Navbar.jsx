@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import logoGubernamental from "../assets/logo-gubernamental.png";
 import "../styles/Navbar.css";
 import { FaUserCircle, FaBars } from "react-icons/fa";
+import Login from "./Login";
+import Register from "./Register";
 
 const proveedoresMenu = [
   [
@@ -62,6 +64,8 @@ const Navbar = () => {
   const [openMenu, setOpenMenu] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
 
   const handleCloseMenu = () => setOpenMenu(null);
 
@@ -90,6 +94,46 @@ const Navbar = () => {
         </div>
       </div>
     );
+  };
+
+  // Funciones para login/register
+  const handleLogin = async ({ email, password }) => {
+    try {
+      const res = await fetch("http://localhost:3001/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Bienvenido, " + data.user.nombre);
+        setShowLogin(false);
+      } else {
+        alert(data.error || "Error al iniciar sesión");
+      }
+    } catch {
+      alert("Error de red");
+    }
+  };
+
+  const handleRegister = async ({ nombre, email, password }) => {
+    try {
+      const res = await fetch("http://localhost:3001/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Usuario registrado correctamente");
+        setShowRegister(false);
+        setShowLogin(true);
+      } else {
+        alert(data.error || "Error al registrar usuario");
+      }
+    } catch {
+      alert("Error de red");
+    }
   };
 
   return (
@@ -143,7 +187,11 @@ const Navbar = () => {
               style={{ display: window.innerWidth <= 900 && !showMobileSearch ? 'block' : '' }}
             >🔍</span>
           </div>
-          <button className="navbar__button navbar__button--user" title="Iniciar sesión">
+          <button
+            className="navbar__button navbar__button--user"
+            title="Iniciar sesión"
+            onClick={() => setShowLogin(true)}
+          >
             <FaUserCircle className="navbar__icon-user" />
           </button>
           {/* Botón hamburguesa solo en mobile, a la derecha del usuario */}
@@ -152,6 +200,18 @@ const Navbar = () => {
           </button>
         </div>
       </div>
+      <Login
+        visible={showLogin}
+        onClose={() => setShowLogin(false)}
+        onLogin={handleLogin}
+        onShowRegister={() => { setShowLogin(false); setShowRegister(true); }}
+      />
+      <Register
+        visible={showRegister}
+        onClose={() => setShowRegister(false)}
+        onRegister={handleRegister}
+        onShowLogin={() => { setShowRegister(false); setShowLogin(true); }}
+      />
     </header>
   );
 };
