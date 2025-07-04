@@ -66,6 +66,7 @@ const Navbar = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const [user, setUser] = useState(null);
 
   const handleCloseMenu = () => setOpenMenu(null);
 
@@ -106,6 +107,7 @@ const Navbar = () => {
       });
       const data = await res.json();
       if (res.ok) {
+        setUser(data.user);
         alert("Bienvenido, " + data.user.nombre);
         setShowLogin(false);
       } else {
@@ -134,6 +136,11 @@ const Navbar = () => {
     } catch {
       alert("Error de red");
     }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setShowLogin(false);
   };
 
   return (
@@ -189,7 +196,7 @@ const Navbar = () => {
           </div>
           <button
             className="navbar__button navbar__button--user"
-            title="Iniciar sesión"
+            title={user ? user.nombre : "Iniciar sesión"}
             onClick={() => setShowLogin(true)}
           >
             <FaUserCircle className="navbar__icon-user" />
@@ -205,6 +212,8 @@ const Navbar = () => {
         onClose={() => setShowLogin(false)}
         onLogin={handleLogin}
         onShowRegister={() => { setShowLogin(false); setShowRegister(true); }}
+        user={user}
+        onLogout={handleLogout}
       />
       <Register
         visible={showRegister}
