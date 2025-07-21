@@ -20,6 +20,7 @@
   position: relative;
   min-height: 320px;
   transition: transform var(--news-transition), box-shadow 0.3s;
+  overflow: visible;
 }
 
 .news-slide {
@@ -29,6 +30,7 @@
   padding: 2.5rem 3.2rem;
   min-width: 420px;
   max-width: 600px;
+  width: 100%;
   flex: 1 1 0;
   display: flex;
   flex-direction: column;
@@ -36,14 +38,28 @@
   gap: 0.7rem;
   border: 1.5px solid #e6f0f7;
   z-index: 2;
-  transition: transform var(--news-transition), box-shadow 0.3s, left var(--news-transition);
+  transition: transform var(--news-transition), box-shadow 0.3s, left var(--news-transition), border-color 0.3s;
   position: relative;
   left: 0;
+  margin: 0;
 }
+
+/* SOLUCIÓN: Reemplazar scale() con efectos visuales que no afecten el layout */
 .news-slide.hovered {
-  transform: scale(1.045);
-  box-shadow: 0 12px 48px rgba(26,86,123,0.18);
-  transition: transform var(--news-transition), box-shadow 0.3s, left var(--news-transition);
+  /* NO usar transform: scale() */
+  /* En su lugar, usar: */
+  box-shadow: 
+    0 16px 64px rgba(26,86,123,0.25), /* Sombra más intensa */
+    0 0 0 3px rgba(26,86,123,0.08),   /* Borde simulado */
+    inset 0 1px 0 rgba(255,255,255,0.5); /* Brillo interno */
+  
+  border-color: rgba(26,86,123,0.2);
+  z-index: 5;
+  
+  /* Opcional: Ligero movimiento hacia arriba sin afectar el layout */
+  transform: translateY(-2px);
+  
+  transition: transform var(--news-transition), box-shadow 0.3s, left var(--news-transition), border-color 0.3s;
 }
 
 .news-date {

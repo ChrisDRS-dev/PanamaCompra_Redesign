@@ -11,6 +11,54 @@ body {
     background: #f7f8f9;
 }
 
+/* Modo oscuro usando la clase 'dark' de Tailwind */
+.dark body {
+    background: #18181b;
+    color: #f3f4f6;
+}
+
+.dark .navbar__topbar,
+.dark .navbar__mainbar {
+    background: #23272f !important;
+    border-bottom-color: #334155 !important;
+}
+
+.dark .navbar__link,
+.dark .navbar__dropdown-btn {
+    background: #1e293b !important;
+    color: #f3f4f6 !important;
+    border-color: #334155 !important;
+}
+
+.dark .navbar__link--active,
+.dark .navbar__link:hover,
+.dark .navbar__link:focus {
+    background: #334155 !important;
+    color: #fff !important;
+    border-color: #334155 !important;
+}
+
+.dark .navbar__button {
+    color: #f3f4f6 !important;
+    border-color: #334155 !important;
+}
+
+.dark .navbar__button--primary,
+.dark .navbar__button--user {
+    background: #334155 !important;
+    color: #fff !important;
+}
+
+.dark .navbar__search-group {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+.dark .navbar__dropdown-menu {
+    background: #23272f !important;
+    color: #f3f4f6 !important;
+}
+
 @media (max-width: 700px) {
   body {
     font-size: 0.97rem;

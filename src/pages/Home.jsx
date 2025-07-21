@@ -4,6 +4,8 @@ import Title from "../components/Title";
 import News from "../components/News";
 import Versions from "../components/Versions";
 import Tools from "../components/Tools";
+import Links from "../components/Links";
+import Footer from "../components/Footer";
 
 const Home = () => {
   return (
@@ -13,6 +15,8 @@ const Home = () => {
       <News />
       <Versions />
       <Tools />
+      <Links />
+      <Footer />
     </div>
   );
 };

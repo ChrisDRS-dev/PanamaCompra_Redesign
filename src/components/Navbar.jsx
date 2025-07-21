@@ -4,6 +4,8 @@ import "../styles/Navbar.css";
 import { FaUserCircle, FaBars } from "react-icons/fa";
 import Login from "./Login";
 import Register from "./Register";
+import { useTheme } from "../context/ThemeContext";
+import { FaSun, FaMoon } from "react-icons/fa";
 
 const proveedoresMenu = [
   [
@@ -67,6 +69,7 @@ const Navbar = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [user, setUser] = useState(null);
+  const { theme, toggleTheme } = useTheme();
 
   const handleCloseMenu = () => setOpenMenu(null);
 
@@ -200,6 +203,14 @@ const Navbar = () => {
             onClick={() => setShowLogin(true)}
           >
             <FaUserCircle className="navbar__icon-user" />
+          </button>
+          <button
+            className="navbar__button navbar__button--theme"
+            onClick={toggleTheme}
+            title={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+            style={{ marginLeft: "1rem", fontSize: "1.3rem", background: "none", border: "none", cursor: "pointer" }}
+          >
+            {theme === "dark" ? <FaSun /> : <FaMoon />}
           </button>
           {/* Botón hamburguesa solo en mobile, a la derecha del usuario */}
           <button className="navbar__hamburger" onClick={() => setMobileMenuOpen((v) => !v)}>

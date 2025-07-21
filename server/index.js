@@ -62,6 +62,7 @@ app.post('/api/facturas', (req, res) => {
     stmt.run(usuario_id, monto, descripcion, fecha);
     res.status(201).json({ message: 'Factura creada' });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Error al crear factura' });
   }
 });
@@ -82,6 +83,7 @@ app.put('/api/facturas/:id', (req, res) => {
     stmt.run(monto, descripcion, fecha, id);
     res.json({ message: 'Factura actualizada' });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Error al actualizar factura' });
   }
 });
@@ -94,6 +96,7 @@ app.delete('/api/facturas/:id', (req, res) => {
     stmt.run(id);
     res.json({ message: 'Factura eliminada' });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Error al eliminar factura' });
   }
 });
