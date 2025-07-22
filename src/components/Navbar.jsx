@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import logoGubernamental from "../assets/logo-gubernamental.png";
 import "../styles/Navbar.css";
 import { FaUserCircle, FaBars } from "react-icons/fa";
@@ -69,6 +69,15 @@ const Navbar = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [user, setUser] = useState(null);
+  useEffect(() => {
+    // Al montar, intenta cargar usuario de localStorage
+    const stored = localStorage.getItem("user");
+    if (stored) {
+      try {
+        setUser(JSON.parse(stored));
+      } catch {}
+    }
+  }, []);
   const { theme, toggleTheme } = useTheme();
 
   const handleCloseMenu = () => setOpenMenu(null);
@@ -111,6 +120,7 @@ const Navbar = () => {
       const data = await res.json();
       if (res.ok) {
         setUser(data.user);
+        localStorage.setItem("user", JSON.stringify(data.user));
         alert("Bienvenido, " + data.user.nombre);
         setShowLogin(false);
       } else {
@@ -144,6 +154,7 @@ const Navbar = () => {
   const handleLogout = () => {
     setUser(null);
     setShowLogin(false);
+    localStorage.removeItem("user");
   };
 
   return (

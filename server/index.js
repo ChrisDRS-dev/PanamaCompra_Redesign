@@ -101,6 +101,16 @@ app.delete('/api/facturas/:id', (req, res) => {
   }
 });
 
+// Endpoint para obtener todos los productos
+app.get('/api/productos', (req, res) => {
+  try {
+    const rows = db.prepare('SELECT * FROM productos').all();
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al obtener productos' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor backend escuchando en http://localhost:${PORT}`);
 }); 
