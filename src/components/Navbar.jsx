@@ -69,13 +69,18 @@ const Navbar = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [authSuccess, setAuthSuccess] = useState('');
   useEffect(() => {
     // Al montar, intenta cargar usuario de localStorage
     const stored = localStorage.getItem("user");
     if (stored) {
       try {
         setUser(JSON.parse(stored));
-      } catch {}
+      } catch (error) {
+        console.error('Error al cargar el usuario desde localStorage:', error);
+      }
     }
   }, []);
   const { theme, toggleTheme } = useTheme();
@@ -109,8 +114,20 @@ const Navbar = () => {
     );
   };
 
+  // Limpiar mensajes de autenticación cuando se cierran los modales
+  useEffect(() => {
+    if (!showLogin && !showRegister) {
+      setAuthError('');
+      setAuthSuccess('');
+    }
+  }, [showLogin, showRegister]);
+
   // Funciones para login/register
   const handleLogin = async ({ email, password }) => {
+    setAuthLoading(true);
+    setAuthError('');
+    setAuthSuccess('');
+    
     try {
       const res = await fetch("http://localhost:3001/api/login", {
         method: "POST",
@@ -118,20 +135,31 @@ const Navbar = () => {
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
+      
       if (res.ok) {
         setUser(data.user);
         localStorage.setItem("user", JSON.stringify(data.user));
-        alert("Bienvenido, " + data.user.nombre);
-        setShowLogin(false);
+        setAuthSuccess(`¡Bienvenido, ${data.user.nombre}!`);
+        // Cerrar el modal después de un breve retraso para mostrar el mensaje de éxito
+        setTimeout(() => {
+          setShowLogin(false);
+          setAuthSuccess('');
+        }, 1500);
       } else {
-        alert(data.error || "Error al iniciar sesión");
+        setAuthError(data.error || "Error al iniciar sesión. Verifica tus credenciales.");
       }
-    } catch {
-      alert("Error de red");
+    } catch (error) {
+      setAuthError("Error de conexión. Por favor, inténtalo de nuevo más tarde.");
+    } finally {
+      setAuthLoading(false);
     }
   };
 
   const handleRegister = async ({ nombre, email, password }) => {
+    setAuthLoading(true);
+    setAuthError('');
+    setAuthSuccess('');
+    
     try {
       const res = await fetch("http://localhost:3001/api/register", {
         method: "POST",
@@ -139,15 +167,22 @@ const Navbar = () => {
         body: JSON.stringify({ nombre, email, password })
       });
       const data = await res.json();
+      
       if (res.ok) {
-        alert("Usuario registrado correctamente");
-        setShowRegister(false);
-        setShowLogin(true);
+        setAuthSuccess("¡Registro exitoso! Redirigiendo al inicio de sesión...");
+        // Cambiar al formulario de inicio de sesión después de un breve retraso
+        setTimeout(() => {
+          setShowRegister(false);
+          setShowLogin(true);
+          setAuthSuccess('');
+        }, 2000);
       } else {
-        alert(data.error || "Error al registrar usuario");
+        setAuthError(data.error || "Error al registrar el usuario. Intenta con otro correo electrónico.");
       }
-    } catch {
-      alert("Error de red");
+    } catch (error) {
+      setAuthError("Error de conexión. Por favor, inténtalo de nuevo más tarde.");
+    } finally {
+      setAuthLoading(false);
     }
   };
 
@@ -155,6 +190,8 @@ const Navbar = () => {
     setUser(null);
     setShowLogin(false);
     localStorage.removeItem("user");
+    setAuthSuccess('');
+    setAuthError('');
   };
 
   return (
@@ -233,15 +270,31 @@ const Navbar = () => {
         visible={showLogin}
         onClose={() => setShowLogin(false)}
         onLogin={handleLogin}
-        onShowRegister={() => { setShowLogin(false); setShowRegister(true); }}
+        onShowRegister={() => { 
+          setShowLogin(false); 
+          setShowRegister(true);
+          setAuthError('');
+          setAuthSuccess('');
+        }}
         user={user}
         onLogout={handleLogout}
+        error={authError}
+        success={authSuccess}
+        loading={authLoading}
       />
       <Register
         visible={showRegister}
         onClose={() => setShowRegister(false)}
         onRegister={handleRegister}
-        onShowLogin={() => { setShowRegister(false); setShowLogin(true); }}
+        onShowLogin={() => { 
+          setShowRegister(false); 
+          setShowLogin(true);
+          setAuthError('');
+          setAuthSuccess('');
+        }}
+        error={authError}
+        success={authSuccess}
+        loading={authLoading}
       />
     </header>
   );

@@ -1,15 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Login.css';
 
-export default function Login({ visible, onClose, onLogin, onShowRegister, user, onLogout }) {
+export default function Login({ visible, onClose, onLogin, onShowRegister, user, onLogout, error, loading }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [localError, setLocalError] = useState('');
+
+  // Limpiar mensajes cuando se cierra el modal
+  useEffect(() => {
+    if (!visible) {
+      setLocalError('');
+    }
+  }, [visible]);
 
   if (!visible) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onLogin({ email, password });
+    setLocalError('');
+    
+    // Validación básica
+    if (!email || !password) {
+      setLocalError('Por favor complete todos los campos');
+      return;
+    }
+    
+    await onLogin({ email, password });
   };
 
   return (
@@ -30,6 +46,20 @@ export default function Login({ visible, onClose, onLogin, onShowRegister, user,
         ) : (
           <>
             <h2>Iniciar Sesión</h2>
+            {(error || localError) && (
+              <div style={{
+                backgroundColor: '#f8d7da',
+                color: '#721c24',
+                padding: '10px',
+                borderRadius: '4px',
+                marginBottom: '15px',
+                border: '1px solid #f5c6cb',
+                fontSize: '0.9em'
+              }}>
+                {error || localError}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit}>
               <input
                 type="email"
@@ -45,7 +75,9 @@ export default function Login({ visible, onClose, onLogin, onShowRegister, user,
                 onChange={e => setPassword(e.target.value)}
                 required
               />
-              <button type="submit">Entrar</button>
+              <button type="submit" disabled={loading}>
+                {loading ? 'Iniciando sesión...' : 'Entrar'}
+              </button>
             </form>
             <div style={{ marginTop: '1rem', textAlign: 'center' }}>
               ¿No tienes cuenta?{' '}
