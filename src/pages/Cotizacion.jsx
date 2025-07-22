@@ -110,6 +110,8 @@ export default function Cotizacion() {
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [showFactura, setShowFactura] = useState(false);
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState("");
 
   useEffect(() => {
     setForm(f => ({ ...f, nombre: user.nombre, email: user.email }));
@@ -147,54 +149,52 @@ export default function Cotizacion() {
       
       // 2. Crear un enlace de descarga para el PDF
       const pdfUrl = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = pdfUrl;
-      link.download = `factura_${form.nombre.replace(/\s+/g, '_')}.pdf`;
+      setPdfUrl(pdfUrl); // Guardar la URL para usarla en la vista previa
       
-      // 3. Simular el envío del correo (solo en el frontend)
-      console.log('Simulando envío de correo a:', form.email);
-      console.log('Asunto:', `Factura de compra - ${form.nombre}`);
-      console.log('PDF generado y listo para descargar');
-      
-      // 4. Mostrar mensaje al usuario
-      const confirmarDescarga = window.confirm(
-        `Se ha generado la factura para ${form.nombre}.\n` +
-        `Se enviará una copia a: ${form.email}\n\n` +
-        '¿Desea descargar la factura ahora?'
-      );
-      
-      if (confirmarDescarga) {
-        // Descargar el PDF automáticamente
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Mostrar mensaje de éxito
-        alert('¡Factura generada y enviada por correo exitosamente!\n\n' +
-              'Nota: Esta es una simulación. En un entorno real, el correo se enviaría automáticamente.');
-      } else {
-        alert('Puede descargar la factura más tarde haciendo clic en "Descargar PDF".');
-      }
-      
-      setEnviado(true);
+      // 3. Mostrar la vista previa del correo
+      setShowEmailPreview(true);
       
     } catch (error) {
       console.error('Error al generar la factura:', error);
       alert('Error al generar la factura. Por favor, intente nuevamente.');
     } finally {
       setEnviando(false);
-      
-      // Limpiar el formulario después de 2 segundos
-      setTimeout(() => {
-        setForm({
-          nombre: user.nombre || '',
-          email: user.email || '',
-          producto: '',
-          cantidad: 1,
-          precio: 0
-        });
-        setEnviado(false);
-      }, 2000);
+    }
+  };
+  
+  const handleDownloadPDF = () => {
+    if (!pdfUrl) return;
+    
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = `factura_${form.nombre.replace(/\s+/g, '_')}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Cerrar el modal después de descargar
+    setShowEmailPreview(false);
+    
+    // Limpiar el formulario después de 1 segundo
+    setTimeout(() => {
+      setForm({
+        nombre: user.nombre || '',
+        email: user.email || '',
+        producto: '',
+        cantidad: 1,
+        precio: 0
+      });
+      setEnviado(false);
+      setPdfUrl('');
+    }, 1000);
+  };
+  
+  const handleCloseEmailPreview = () => {
+    setShowEmailPreview(false);
+    // Liberar la URL del objeto Blob cuando ya no se necesite
+    if (pdfUrl) {
+      URL.revokeObjectURL(pdfUrl);
+      setPdfUrl('');
     }
   };
 
@@ -372,6 +372,174 @@ export default function Cotizacion() {
           </PDFDownloadLink>
         </div>
       </div>
+      
+      {/* Modal de vista previa del correo */}
+      {showEmailPreview && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            width: '100%',
+            maxWidth: '800px',
+            maxHeight: '90vh',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {/* Encabezado del modal */}
+            <div style={{
+              backgroundColor: '#1a567b',
+              color: 'white',
+              padding: '15px 20px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h3 style={{ margin: 0 }}>Vista previa del correo</h3>
+              <button 
+                onClick={handleCloseEmailPreview}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  padding: '5px 10px'
+                }}
+              >
+                &times;
+              </button>
+            </div>
+            
+            {/* Cuerpo del correo */}
+            <div style={{ 
+              padding: '20px',
+              flex: 1,
+              overflowY: 'auto',
+              backgroundColor: '#f5f5f5',
+              borderBottom: '1px solid #ddd'
+            }}>
+              <div style={{
+                maxWidth: '600px',
+                margin: '0 auto',
+                backgroundColor: 'white',
+                borderRadius: '8px',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                overflow: 'hidden'
+              }}>
+                {/* Encabezado del correo */}
+                <div style={{ 
+                  backgroundColor: '#1a567b',
+                  color: 'white',
+                  padding: '20px',
+                  textAlign: 'center'
+                }}>
+                  <h2 style={{ margin: 0, color: '#ffb300' }}>PanamaCompra</h2>
+                  <p style={{ margin: '10px 0 0', opacity: 0.9 }}>Factura de Compra</p>
+                </div>
+                
+                {/* Contenido del correo */}
+                <div style={{ padding: '25px' }}>
+                  <p>Estimado/a {form.nombre},</p>
+                  
+                  <p>Gracias por realizar tu compra en PanamaCompra. Adjunto encontrarás la factura de tu compra.</p>
+                  
+                  <div style={{
+                    backgroundColor: '#f8f9fa',
+                    padding: '15px',
+                    borderRadius: '6px',
+                    margin: '20px 0',
+                    borderLeft: '4px solid #1a567b'
+                  }}>
+                    <p style={{ margin: '5px 0', fontWeight: 'bold' }}>Resumen de la compra:</p>
+                    <p style={{ margin: '5px 0' }}>• Producto: {productos.find(p => String(p.id) === String(form.producto))?.nombre || 'N/A'}</p>
+                    <p style={{ margin: '5px 0' }}>• Cantidad: {form.cantidad}</p>
+                    <p style={{ margin: '5px 0' }}>• Precio unitario: ${parseFloat(form.precio).toFixed(2)}</p>
+                    <p style={{ margin: '10px 0 0', paddingTop: '10px', borderTop: '1px solid #ddd', fontWeight: 'bold' }}>
+                      Total: ${(parseFloat(form.precio) * parseInt(form.cantidad)).toFixed(2)}
+                    </p>
+                  </div>
+                  
+                  <p>Si tienes alguna pregunta sobre tu pedido, no dudes en contactarnos.</p>
+                  
+                  <p>¡Gracias por elegir PanamaCompra!</p>
+                  
+                  <p>Atentamente,<br/>El equipo de PanamaCompra</p>
+                </div>
+                
+                {/* Pie de página del correo */}
+                <div style={{
+                  backgroundColor: '#f5f5f5',
+                  padding: '15px 25px',
+                  textAlign: 'center',
+                  fontSize: '12px',
+                  color: '#666',
+                  borderTop: '1px solid #eee'
+                }}>
+                  <p style={{ margin: '5px 0' }}>© {new Date().getFullYear()} PanamaCompra. Todos los derechos reservados.</p>
+                  <p style={{ margin: '5px 0', fontSize: '11px', color: '#999' }}>
+                    Este es un correo automático, por favor no lo responda.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Pie del modal */}
+            <div style={{
+              padding: '15px 20px',
+              backgroundColor: '#f8f9fa',
+              borderTop: '1px solid #ddd',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '10px'
+            }}>
+              <button
+                onClick={handleCloseEmailPreview}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#6c757d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cerrar
+              </button>
+              <button
+                onClick={handleDownloadPDF}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#1a567b',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <span>Descargar Factura</span>
+                <span>↓</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <Footer />
       <style>{`
         @media (max-width: 700px) {
