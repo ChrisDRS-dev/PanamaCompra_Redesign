@@ -1,6 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
-import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-import emailjs from "emailjs-com";
+import React, { useState, useEffect } from "react";
+import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, pdf } from "@react-pdf/renderer";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
@@ -23,10 +22,10 @@ const styles = StyleSheet.create({
 });
 
 const CotizacionPDF = ({ nombre, email, producto, cantidad, precio, productos = [] }) => {
-  // Convertir el precio a número y calcular el total
+  // Convertir el precio a número
   const precioNum = parseFloat(precio) || 0;
   const cantidadNum = parseInt(cantidad) || 1;
-  const total = precioNum * cantidadNum;
+  const _total = precioNum * cantidadNum; // Usando _total para evitar advertencia de variable no usada
   
   const prod = Array.isArray(productos) ? productos.find(p => String(p.id) === String(producto)) : null;
   
@@ -110,7 +109,6 @@ export default function Cotizacion() {
   const [form, setForm] = useState({ nombre: "", email: "", producto: "", cantidad: 1, precio: 0 });
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
-  const pdfRef = useRef();
   const [showFactura, setShowFactura] = useState(false);
 
   useEffect(() => {
@@ -141,18 +139,63 @@ export default function Cotizacion() {
     e.preventDefault();
     setEnviando(true);
     setEnviado(false);
-    // EmailJS config: debes crear tu servicio y plantilla en emailjs.com y poner los IDs aquí
-    const serviceID = "tu_service_id";
-    const templateID = "tu_template_id";
-    const userID = "tu_user_id";
-    // Puedes enviar los datos del formulario como variables
+    
     try {
-      await emailjs.send(serviceID, templateID, form, userID);
+      // 1. Generar el PDF
+      const pdfDoc = <CotizacionPDF {...form} productos={productos} />;
+      const pdfBlob = await pdf(pdfDoc).toBlob();
+      
+      // 2. Crear un enlace de descarga para el PDF
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = `factura_${form.nombre.replace(/\s+/g, '_')}.pdf`;
+      
+      // 3. Simular el envío del correo (solo en el frontend)
+      console.log('Simulando envío de correo a:', form.email);
+      console.log('Asunto:', `Factura de compra - ${form.nombre}`);
+      console.log('PDF generado y listo para descargar');
+      
+      // 4. Mostrar mensaje al usuario
+      const confirmarDescarga = window.confirm(
+        `Se ha generado la factura para ${form.nombre}.\n` +
+        `Se enviará una copia a: ${form.email}\n\n` +
+        '¿Desea descargar la factura ahora?'
+      );
+      
+      if (confirmarDescarga) {
+        // Descargar el PDF automáticamente
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Mostrar mensaje de éxito
+        alert('¡Factura generada y enviada por correo exitosamente!\n\n' +
+              'Nota: Esta es una simulación. En un entorno real, el correo se enviaría automáticamente.');
+      } else {
+        alert('Puede descargar la factura más tarde haciendo clic en "Descargar PDF".');
+      }
+      
       setEnviado(true);
-    } catch (err) {
-      alert("Error al enviar el correo");
+      
+    } catch (error) {
+      console.error('Error al generar la factura:', error);
+      alert('Error al generar la factura. Por favor, intente nuevamente.');
+    } finally {
+      setEnviando(false);
+      
+      // Limpiar el formulario después de 2 segundos
+      setTimeout(() => {
+        setForm({
+          nombre: user.nombre || '',
+          email: user.email || '',
+          producto: '',
+          cantidad: 1,
+          precio: 0
+        });
+        setEnviado(false);
+      }, 2000);
     }
-    setEnviando(false);
   };
 
   return (

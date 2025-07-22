@@ -3,6 +3,10 @@ import db from './db.js';
 import './init_db.js'; // Inicializa las tablas si no existen
 import cors from 'cors';
 import bcrypt from 'bcrypt';
+import nodemailer from 'nodemailer';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import fs from 'fs';
 
 const app = express();
 const PORT = 3001;
@@ -111,6 +115,57 @@ app.get('/api/productos', (req, res) => {
   }
 });
 
+// Configuración del transportador de correo con Mailtrap
+const transporter = nodemailer.createTransport({
+  host: process.env.MAILTRAP_HOST || 'sandbox.smtp.mailtrap.io',
+  port: parseInt(process.env.MAILTRAP_PORT) || 2525,
+  secure: false, // true para 465, false para otros puertos
+  auth: {
+    user: process.env.MAILTRAP_USER,
+    pass: process.env.MAILTRAP_PASS
+  },
+  tls: {
+    // No fallar en certificados inválidos (útil para pruebas)
+    rejectUnauthorized: false
+  }
+});
+
+// Endpoint para enviar factura por correo
+app.post('/api/enviar-factura', (req, res) => {
+  const { to, subject, text, pdfBase64, nombreArchivo = 'factura.pdf' } = req.body;
+
+  if (!to || !pdfBase64) {
+    return res.status(400).json({ error: 'Faltan campos requeridos' });
+  }
+
+  // Convertir base64 a buffer
+  const pdfBuffer = Buffer.from(pdfBase64, 'base64');
+
+  const mailOptions = {
+    from: `"${process.env.EMAIL_FROM_NAME || 'PanamaCompra'}" <${process.env.EMAIL_FROM || 'noreply@panamacompra.com'}>`,
+    to,
+    subject: subject || 'Factura de compra',
+    text: text || 'Adjunto encontrará su factura de compra.',
+    attachments: [
+      {
+        filename: nombreArchivo,
+        content: pdfBuffer,
+        contentType: 'application/pdf',
+        encoding: 'base64'
+      }
+    ]
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error al enviar el correo:', error);
+      return res.status(500).json({ error: 'Error al enviar el correo', details: error.message });
+    }
+    console.log('Correo enviado:', info.messageId);
+    res.json({ message: 'Correo enviado correctamente', messageId: info.messageId });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor backend escuchando en http://localhost:${PORT}`);
-}); 
+});
