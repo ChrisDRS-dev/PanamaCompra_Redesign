@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './Login.css';
+import '../styles/Login.css';
 
 export default function Register({ visible, onClose, onRegister, onShowLogin, error, success, loading }) {
   const [nombre, setNombre] = useState('');

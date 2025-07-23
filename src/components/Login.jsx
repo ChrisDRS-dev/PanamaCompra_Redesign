@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './Login.css';
+import '../styles/Login.css';
 
 export default function Login({ visible, onClose, onLogin, onShowRegister, user, onLogout, error, loading }) {
   const [email, setEmail] = useState('');
