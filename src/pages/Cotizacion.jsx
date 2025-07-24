@@ -109,7 +109,7 @@ export default function Cotizacion() {
   const [form, setForm] = useState({ nombre: "", email: "", producto: "", cantidad: 1, precio: 0 });
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
-  const [showFactura, setShowFactura] = useState(false);
+  const [showCotizacion, setShowCotizacion] = useState(false);
   const [showEmailPreview, setShowEmailPreview] = useState(false);
   const [pdfUrl, setPdfUrl] = useState("");
 
@@ -155,8 +155,8 @@ export default function Cotizacion() {
       setShowEmailPreview(true);
       
     } catch (error) {
-      console.error('Error al generar la factura:', error);
-      alert('Error al generar la factura. Por favor, intente nuevamente.');
+      console.error('Error al generar la cotización:', error);
+      alert('Error al generar la cotización. Por favor, intente nuevamente.');
     } finally {
       setEnviando(false);
     }
@@ -167,7 +167,7 @@ export default function Cotizacion() {
     
     const link = document.createElement('a');
     link.href = pdfUrl;
-    link.download = `factura_${form.nombre.replace(/\s+/g, '_')}.pdf`;
+    link.download = `cotizacion_${form.nombre.replace(/\s+/g, '_')}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -184,7 +184,7 @@ export default function Cotizacion() {
         cantidad: 1,
         precio: 0
       });
-      setEnviado(false);
+      setEnviado(true);
       setPdfUrl('');
     }, 1000);
   };
@@ -286,11 +286,11 @@ export default function Cotizacion() {
               ${ (Number(form.precio) * Number(form.cantidad)).toFixed(2) }
             </span>
           </div>
-          {/* Botón para mostrar/ocultar factura fiscal */}
+          {/* Botón para mostrar/ocultar cotización */}
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
             <button
               type="button"
-              onClick={() => setShowFactura(v => !v)}
+              onClick={() => setShowCotizacion(v => !v)}
               style={{
                 background: '#fff',
                 color: '#1a567b',
@@ -298,17 +298,15 @@ export default function Cotizacion() {
                 borderRadius: 6,
                 padding: '10px 24px',
                 fontWeight: 600,
-                fontSize: 16,
+                fontSize: 14,
                 cursor: 'pointer',
-                marginTop: 8,
-                marginBottom: 8,
                 transition: 'background 0.2s, color 0.2s',
               }}
             >
-              {showFactura ? 'Ocultar factura' : 'Ver factura'}
+              {showCotizacion ? 'Ocultar cotización' : 'Ver cotización'}
             </button>
           </div>
-          {showFactura && form.producto && (
+          {showCotizacion && form.producto && (
             <div style={{
               background: '#fff',
               border: '2.5px solid #1a567b',
@@ -364,12 +362,12 @@ export default function Cotizacion() {
         </form>
         {enviado && <div style={{ color: "green", marginTop: 14, textAlign: "center", fontWeight: 500 }}>¡Cotización enviada!</div>}
         <div style={{ marginTop: 28, textAlign: "center" }}>
-          <PDFDownloadLink
+          {/* <PDFDownloadLink
             document={<CotizacionPDF {...form} productos={productos} />}
             fileName={`cotizacion_${form.nombre || "usuario"}.pdf`}
           >
             {({ loading }) => loading ? "Generando PDF..." : <span style={{ color: "#1a567b", fontWeight: 600, textDecoration: "underline", cursor: "pointer" }}>Descargar PDF</span>}
-          </PDFDownloadLink>
+          </PDFDownloadLink> */}
         </div>
       </div>
       
@@ -447,14 +445,14 @@ export default function Cotizacion() {
                   textAlign: 'center'
                 }}>
                   <h2 style={{ margin: 0, color: '#ffb300' }}>PanamaCompra</h2>
-                  <p style={{ margin: '10px 0 0', opacity: 0.9 }}>Factura de Compra</p>
+                  <p style={{ margin: '10px 0 0', opacity: 0.9 }}>Cotización de Compra</p>
                 </div>
                 
                 {/* Contenido del correo */}
                 <div style={{ padding: '25px' }}>
                   <p>Estimado/a {form.nombre},</p>
                   
-                  <p>Gracias por realizar tu compra en PanamaCompra. Adjunto encontrarás la factura de tu compra.</p>
+                  <p>Gracias por realizar tu cotización en PanamaCompra. Adjunto encontrarás la factura de tu cotización.</p>
                   
                   <div style={{
                     backgroundColor: '#f8f9fa',
@@ -488,7 +486,7 @@ export default function Cotizacion() {
                   color: '#666',
                   borderTop: '1px solid #eee'
                 }}>
-                  <p style={{ margin: '5px 0' }}>© {new Date().getFullYear()} PanamaCompra. Todos los derechos reservados.</p>
+                  <p style={{ margin: '5px 0' }}> 2025 PanamaCompra. Todos los derechos reservados.</p>
                   <p style={{ margin: '5px 0', fontSize: '11px', color: '#999' }}>
                     Este es un correo automático, por favor no lo responda.
                   </p>
@@ -532,7 +530,7 @@ export default function Cotizacion() {
                   gap: '8px'
                 }}
               >
-                <span>Descargar Factura</span>
+                <span>Descargar Cotización</span>
                 <span>↓</span>
               </button>
             </div>
