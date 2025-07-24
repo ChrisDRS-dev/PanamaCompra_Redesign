@@ -1,16 +1,74 @@
 import db from './db.js';
+import process from 'process';
 
 // Crear tabla productos
-// Si no existe, crearla
-// id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT, categoria TEXT, descripcion TEXT, precio REAL
-
 db.prepare(`CREATE TABLE IF NOT EXISTS productos (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   nombre TEXT NOT NULL,
   categoria TEXT NOT NULL,
   descripcion TEXT,
-  precio REAL NOT NULL
+  precio REAL NOT NULL,
+  activo BOOLEAN DEFAULT 1
 )`).run();
+
+// Eliminar tablas si existen (solo en desarrollo)
+if (process.env.NODE_ENV === 'development') {
+  try {
+    db.prepare('DROP TABLE IF EXISTS factura_items').run();
+    db.prepare('DROP TABLE IF EXISTS facturas').run();
+    console.log('Tablas de facturación eliminadas para recreación');
+  } catch (error) {
+    console.warn('No se pudieron eliminar las tablas, probablemente no existían:', error.message);
+  }
+}
+
+// Crear tabla de facturas mejorada
+db.prepare(`CREATE TABLE IF NOT EXISTS facturas (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  numero_factura TEXT UNIQUE NOT NULL,
+  usuario_id INTEGER NOT NULL,
+  cliente_nombre TEXT NOT NULL,
+  cliente_identificacion TEXT,
+  cliente_direccion TEXT,
+  cliente_telefono TEXT,
+  cliente_email TEXT,
+  descripcion TEXT,
+  subtotal REAL NOT NULL,
+  impuesto REAL NOT NULL DEFAULT 0,
+  total REAL NOT NULL,
+  estado TEXT NOT NULL DEFAULT 'pendiente',
+  fecha_emision TEXT NOT NULL,
+  fecha_vencimiento TEXT,
+  creado_en TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+)`).run();
+
+// Crear tabla de ítems de factura
+db.prepare(`CREATE TABLE IF NOT EXISTS factura_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  factura_id INTEGER NOT NULL,
+  producto_id INTEGER NOT NULL,
+  descripcion TEXT NOT NULL,
+  cantidad REAL NOT NULL,
+  precio_unitario REAL NOT NULL,
+  subtotal REAL NOT NULL,
+  FOREIGN KEY (factura_id) REFERENCES facturas(id) ON DELETE CASCADE,
+  FOREIGN KEY (producto_id) REFERENCES productos(id)
+)`).run();
+
+// Verificar estructura de las tablas
+console.log('\nEstructura de las tablas creadas:');
+console.log('\nTabla facturas:');
+const facturasInfo = db.prepare('PRAGMA table_info(facturas)').all();
+console.table(facturasInfo);
+
+console.log('\nTabla factura_items:');
+const facturaItemsInfo = db.prepare('PRAGMA table_info(factura_items)').all();
+console.table(facturaItemsInfo);
+
+console.log('\nTabla productos:');
+const productosInfo = db.prepare('PRAGMA table_info(productos)').all();
+console.table(productosInfo);
 
 // Insertar productos de ejemplo solo si la tabla está vacía
 const row = db.prepare('SELECT COUNT(*) as count FROM productos').get();

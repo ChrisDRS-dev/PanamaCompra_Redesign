@@ -54,54 +54,318 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// CRUD de facturas
-// Crear factura
+// Funciones auxiliares para facturas
+function generarNumeroFactura() {
+  const fecha = new Date();
+  const year = fecha.getFullYear().toString().slice(-2);
+  const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `FACT-${year}${mes}-${random}`;
+}
+
+function obtenerFacturaConItems(facturaId) {
+  const factura = db.prepare('SELECT * FROM facturas WHERE id = ?').get(facturaId);
+  if (!factura) return null;
+  
+  const items = db.prepare(`
+    SELECT fi.*, p.nombre as producto_nombre 
+    FROM factura_items fi 
+    LEFT JOIN productos p ON fi.producto_id = p.id 
+    WHERE fi.factura_id = ?
+  `).all(facturaId);
+  
+  return { ...factura, items };
+}
+
+// Crear factura con ítems
 app.post('/api/facturas', (req, res) => {
-  const { usuario_id, monto, descripcion, fecha } = req.body;
-  if (!usuario_id || !monto || !fecha) {
+  const {
+    usuario_id,
+    cliente_nombre,
+    cliente_identificacion = '',
+    cliente_direccion = '',
+    cliente_telefono = '',
+    cliente_email = '',
+    descripcion = '',
+    subtotal,
+    impuesto = 0,
+    total,
+    fecha_emision,
+    fecha_vencimiento = null,
+    items = []
+  } = req.body;
+
+  // Validaciones básicas
+  if (!usuario_id || !cliente_nombre || subtotal === undefined || total === undefined || !fecha_emision) {
     return res.status(400).json({ error: 'Faltan campos requeridos' });
   }
+
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: 'La factura debe tener al menos un ítem' });
+  }
+
+  const numero_factura = generarNumeroFactura();
+  
   try {
-    const stmt = db.prepare('INSERT INTO facturas (usuario_id, monto, descripcion, fecha) VALUES (?, ?, ?, ?)');
-    stmt.run(usuario_id, monto, descripcion, fecha);
-    res.status(201).json({ message: 'Factura creada' });
+    // Iniciar transacción
+    const transaction = db.transaction(() => {
+      // Insertar factura
+      const facturaStmt = db.prepare(`
+        INSERT INTO facturas (
+          numero_factura, usuario_id, cliente_nombre, cliente_identificacion, 
+          cliente_direccion, cliente_telefono, cliente_email, descripcion,
+          subtotal, impuesto, total, fecha_emision, fecha_vencimiento
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      
+      const facturaInfo = facturaStmt.run(
+        numero_factura,
+        usuario_id,
+        cliente_nombre,
+        cliente_identificacion,
+        cliente_direccion,
+        cliente_telefono,
+        cliente_email,
+        descripcion,
+        subtotal,
+        impuesto,
+        total,
+        fecha_emision,
+        fecha_vencimiento
+      );
+      
+      const facturaId = facturaInfo.lastInsertRowid;
+      
+      // Insertar ítems de la factura
+      const itemStmt = db.prepare(`
+        INSERT INTO factura_items (
+          factura_id, producto_id, descripcion, cantidad, precio_unitario, subtotal
+        ) VALUES (?, ?, ?, ?, ?, ?)
+      `);
+      
+      for (const item of items) {
+        itemStmt.run(
+          facturaId,
+          item.producto_id,
+          item.descripcion,
+          item.cantidad,
+          item.precio_unitario,
+          item.subtotal
+        );
+      }
+      
+      return facturaId;
+    });
+    
+    const facturaId = transaction();
+    const facturaCompleta = obtenerFacturaConItems(facturaId);
+    
+    res.status(201).json({ 
+      message: 'Factura creada exitosamente', 
+      factura: facturaCompleta 
+    });
+    
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error al crear factura' });
+    console.error('Error al crear factura:', err);
+    res.status(500).json({ 
+      error: 'Error al crear la factura',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 });
 
-// Obtener facturas de un usuario
-app.get('/api/facturas/:usuario_id', (req, res) => {
+// Obtener facturas de un usuario con sus ítems
+app.get('/api/facturas/usuario/:usuario_id', async (req, res) => {
   const { usuario_id } = req.params;
-  const facturas = db.prepare('SELECT * FROM facturas WHERE usuario_id = ?').all(usuario_id);
-  res.json(facturas);
+  
+  try {
+    // Obtener todas las facturas del usuario
+    const facturas = db.prepare(`
+      SELECT * FROM facturas 
+      WHERE usuario_id = ? 
+      ORDER BY fecha_emision DESC
+    `).all(usuario_id);
+    
+    // Para cada factura, obtener sus ítems
+    const facturasConItems = facturas.map(factura => ({
+      ...factura,
+      items: db.prepare(`
+        SELECT fi.*, p.nombre as producto_nombre 
+        FROM factura_items fi
+        LEFT JOIN productos p ON fi.producto_id = p.id
+        WHERE fi.factura_id = ?
+      `).all(factura.id)
+    }));
+    
+    res.json(facturasConItems);
+  } catch (err) {
+    console.error('Error al obtener facturas:', err);
+    res.status(500).json({ 
+      error: 'Error al obtener las facturas',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
 });
 
-// Actualizar factura
+// Obtener una factura específica por su ID
+app.get('/api/facturas/:id', (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    const factura = obtenerFacturaConItems(id);
+    
+    if (!factura) {
+      return res.status(404).json({ error: 'Factura no encontrada' });
+    }
+    
+    res.json(factura);
+  } catch (err) {
+    console.error('Error al obtener factura:', err);
+    res.status(500).json({ 
+      error: 'Error al obtener la factura',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+});
+
+// Actualizar factura con sus ítems
 app.put('/api/facturas/:id', (req, res) => {
   const { id } = req.params;
-  const { monto, descripcion, fecha } = req.body;
+  const {
+    cliente_nombre,
+    cliente_identificacion,
+    cliente_direccion,
+    cliente_telefono,
+    cliente_email,
+    descripcion,
+    subtotal,
+    impuesto,
+    total,
+    fecha_emision,
+    fecha_vencimiento,
+    estado,
+    items = []
+  } = req.body;
+
+  // Validar que la factura exista
+  const facturaExistente = db.prepare('SELECT id FROM facturas WHERE id = ?').get(id);
+  if (!facturaExistente) {
+    return res.status(404).json({ error: 'Factura no encontrada' });
+  }
+
   try {
-    const stmt = db.prepare('UPDATE facturas SET monto = ?, descripcion = ?, fecha = ? WHERE id = ?');
-    stmt.run(monto, descripcion, fecha, id);
-    res.json({ message: 'Factura actualizada' });
+    // Iniciar transacción
+    const transaction = db.transaction(() => {
+      // Actualizar la factura
+      const updateStmt = db.prepare(`
+        UPDATE facturas SET
+          cliente_nombre = ?,
+          cliente_identificacion = ?,
+          cliente_direccion = ?,
+          cliente_telefono = ?,
+          cliente_email = ?,
+          descripcion = ?,
+          subtotal = ?,
+          impuesto = ?,
+          total = ?,
+          fecha_emision = ?,
+          fecha_vencimiento = ?,
+          estado = ?
+        WHERE id = ?
+      `);
+      
+      updateStmt.run(
+        cliente_nombre,
+        cliente_identificacion,
+        cliente_direccion,
+        cliente_telefono,
+        cliente_email,
+        descripcion,
+        subtotal,
+        impuesto,
+        total,
+        fecha_emision,
+        fecha_vencimiento,
+        estado,
+        id
+      );
+      
+      // Eliminar los ítems actuales
+      db.prepare('DELETE FROM factura_items WHERE factura_id = ?').run(id);
+      
+      // Insertar los nuevos ítems
+      if (Array.isArray(items) && items.length > 0) {
+        const itemStmt = db.prepare(`
+          INSERT INTO factura_items (
+            factura_id, producto_id, descripcion, cantidad, precio_unitario, subtotal
+          ) VALUES (?, ?, ?, ?, ?, ?)
+        `);
+        
+        for (const item of items) {
+          itemStmt.run(
+            id,
+            item.producto_id,
+            item.descripcion,
+            item.cantidad,
+            item.precio_unitario,
+            item.subtotal
+          );
+        }
+      }
+      
+      return id;
+    });
+    
+    const facturaId = transaction();
+    const facturaActualizada = obtenerFacturaConItems(facturaId);
+    
+    res.json({ 
+      message: 'Factura actualizada exitosamente',
+      factura: facturaActualizada
+    });
+    
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error al actualizar factura' });
+    console.error('Error al actualizar factura:', err);
+    res.status(500).json({ 
+      error: 'Error al actualizar la factura',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 });
 
-// Eliminar factura
+// Eliminar factura (y sus ítems por CASCADE)
 app.delete('/api/facturas/:id', (req, res) => {
   const { id } = req.params;
+  
+  // Verificar que la factura exista
+  const factura = db.prepare('SELECT id FROM facturas WHERE id = ?').get(id);
+  if (!factura) {
+    return res.status(404).json({ error: 'Factura no encontrada' });
+  }
+  
   try {
-    const stmt = db.prepare('DELETE FROM facturas WHERE id = ?');
-    stmt.run(id);
-    res.json({ message: 'Factura eliminada' });
+    // Iniciar transacción (aunque el CASCADE manejaría la eliminación de ítems)
+    const transaction = db.transaction(() => {
+      // Eliminar la factura (los ítems se eliminarán en cascada)
+      const stmt = db.prepare('DELETE FROM facturas WHERE id = ?');
+      const result = stmt.run(id);
+      return result.changes > 0;
+    });
+    
+    const eliminada = transaction();
+    
+    if (eliminada) {
+      res.json({ message: 'Factura eliminada exitosamente' });
+    } else {
+      res.status(404).json({ error: 'No se pudo eliminar la factura' });
+    }
+    
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error al eliminar factura' });
+    console.error('Error al eliminar factura:', err);
+    res.status(500).json({ 
+      error: 'Error al eliminar la factura',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 });
 
