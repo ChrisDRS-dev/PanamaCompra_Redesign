@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, pdf } from "@react-pdf/renderer";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import Chatbot from "../components/Chatbot";
 
 const styles = StyleSheet.create({
   page: { padding: 32, fontFamily: 'Helvetica' },
@@ -199,7 +200,7 @@ export default function Cotizacion() {
   };
 
   return (
-    <>
+    <div>
       <Navbar />
       <div style={{ maxWidth: 520, margin: "48px auto 32px auto", padding: 32, background: "#f8fafc", borderRadius: 14, boxShadow: "0 4px 24px rgba(26,86,123,0.10)", border: "1.5px solid #e6f0f7", boxSizing: "border-box" }}>
         <h2 style={{ textAlign: "center", color: "#1a567b", marginBottom: 24, fontWeight: 700, letterSpacing: 0.5 }}>Cotización en Línea</h2>
@@ -539,6 +540,7 @@ export default function Cotizacion() {
       )}
       
       <Footer />
+      <Chatbot />
       <style>{`
         @media (max-width: 700px) {
           .cotizacion-form-container {
@@ -557,6 +559,6 @@ export default function Cotizacion() {
           }
         }
       `}</style>
-    </>
+    </div>
   );
 } 

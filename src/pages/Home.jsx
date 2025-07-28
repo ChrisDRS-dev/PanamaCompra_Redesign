@@ -6,6 +6,7 @@ import Versions from "../components/Versions";
 import Tools from "../components/Tools";
 import Links from "../components/Links";
 import Footer from "../components/Footer";
+import Chatbot from "../components/Chatbot";
 
 const Home = () => {
   return (
@@ -17,8 +18,9 @@ const Home = () => {
       <Tools />
       <Links />
       <Footer />
+      <Chatbot />
     </div>
   );
 };
 
-export default Home; 
+export default Home;
